@@ -17,14 +17,16 @@ int main(int argc, char* argv[]) {
   double n = 1.5;
   int order = 1;
   int numElements = 10;
+  double root = PI;
 
   mfem::OptionsParser args(argc, argv);
   args.AddOption(&order, "-o", "--order", "Order Solver to use [1]");
   args.AddOption(&numElements, "-ne", "--numberOfElements", "Number of Elements to use [10]");
   args.AddOption(&n, "-n", "--polytropicIndex", "Poytropic Index to use [1.5]");
+  args.AddOption(&root, "-r", "--root", "root to set second tdof at [PI]");
   args.ParseCheck();
 
-  mfem::Mesh mesh = mfem::Mesh::MakeCartesian1D(numElements, PI);
+  mfem::Mesh mesh = mfem::Mesh::MakeCartesian1D(numElements, root);
 
   mfem::H1_FECollection fec(order, 1);
   mfem::FiniteElementSpace fes(&mesh, &fec);
@@ -32,7 +34,10 @@ int main(int argc, char* argv[]) {
   // This makes some function u over the finite element space
   mfem::GridFunction u(&fes);
   u = 0.0; // This sets the initial conditions of u (0 temp everywhere)
-  mfem::FunctionCoefficient initCoeff(theta_initial_guess);
+  mfem::FunctionCoefficient initCoeff(
+    [root](const mfem::Vector &x) -> double {
+      return theta_initial_guess(x, root);
+    });
   u.ProjectCoefficient(initCoeff);
 
   mfem::Array<int> ess_tdof_list;

@@ -11,10 +11,10 @@ double xi_coeff_func(const mfem::Vector &x) {
 
 void vec_xi_coeff_func(const mfem::Vector &x, mfem::Vector &v) {
   v.SetSize(1);
-  v[0] = std::pow(x(0), 2);
+  v[0] = -std::pow(x(0), 2);
 }
 
-double theta_initial_guess(const mfem::Vector &x) {
+double theta_initial_guess(const mfem::Vector &x, double root) {
   double xi = x[0];
-  return 1-std::pow(xi/(PI), 2);
+  return 1-std::pow(xi/root, 2);
 }
