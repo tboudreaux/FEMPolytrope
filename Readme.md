@@ -39,3 +39,54 @@ If you want to build with debugging symbols
 ```bash
 ./mk --debug
 ```
+
+## Weak form
+We start with the strong form of the lane-emden equation
+
+$$
+\frac{1}{\xi^2}\frac{d}{d\xi}\left(\xi^{2}\frac{d\theta}{d\xi}\right) + \theta^{n} = 0
+$$
+
+where $n$ is the polytropic index. Note how when $\xi=0$ there is a singularity. We multiply both sides by $\xi^{2}$ to avoid this singularity
+
+$$
+\frac{d}{d\xi}\left(\xi^{2}\frac{d\theta}{d\xi}\right) + \xi^{2}\theta^{n} = 0
+$$
+
+now to put this in its weak form we multiple by a test function ($v(\xi)$) and integrate over some domain $\Omega$
+
+$$
+\int_{\Omega} v(\xi)\frac{d}{d\xi}\left(\xi^{2}\frac{d\theta}{d\xi}\right)d\Omega + \int_{\Omega}v(\xi)\xi^{2}\theta^{n}d\Omega = 0
+$$
+
+By integration by parts the first term can be rewritten as
+
+$$
+\int_{\Omega} v(\xi)\frac{d}{d\xi}\left(\xi^{2}\frac{d\theta}{d\xi}\right)d\Omega = \left[v(\xi)\xi^{2}\frac{d\theta}{d\xi}\right]_ {\partial \Omega} - \int_{\Omega} r^{2}\frac{dv}{d\xi}\frac{d\theta}{d\xi}
+$$
+
+so then the weak form of the lane-emden equation is
+
+$$
+\left[v(\xi)\xi^{2}\frac{d\theta}{d\xi}\right]_ {\partial \Omega} - \int_{\Omega} r^{2}\frac{dv}{d\xi}\frac{d\theta}{d\xi} + \int_{\Omega}v(\xi)\xi^{2}\theta^{n}d\Omega = 0
+$$
+
+$$
+\left[v(\xi)\xi^{2}\frac{d\theta}{d\xi}\right]_ {\partial \Omega} - \int_{\Omega} r^{2}\frac{dv}{d\xi}\frac{d\theta}{d\xi} + \int_{\Omega}v(\xi)\xi^{2}\theta^{n}d\Omega = 0
+$$
+
+we know that we want to let $\frac{d\theta}{d\xi}(\xi=0) = 0$ so 
+
+$$
+v(\xi)\xi^{2}\frac{d\theta}{d\xi}|_ {\xi=\xi_{s}} - \int_{\Omega} r^{2}\frac{dv}{d\xi}\frac{d\theta}{d\xi} + \int_{\Omega}v(\xi)\xi^{2}\theta^{n}d\Omega = 0
+$$
+
+this is the final weak form of our expression
+
+## Representing this in MFEM
+
+We can represent this weak form as a nonlinear form composed of a:
+
+1. Domain `DiffusionIntegrator` with a `VectorFunctionCoefficient` evaluated as $-\xi^{2}$
+2. Domain `NonlinearPowerIntegrator` with a `FunctionCoefficient evaulated as $\xi^{2}$. Note that this needs to be implimented as a custom integrator. This is done in `src/utils/mfemUtils.cpp`.
+3. Some kind of domain integrator I think (the first term is the one I am still not sure how to deal with.
