@@ -1,4 +1,4 @@
 build/
 build_dbg/
 *.csv
-cache/
+.cache/
